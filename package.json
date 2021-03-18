@@ -1,0 +1,36 @@
+{
+  "name": "demo-news",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "script": {
+    "dev": "webpack-dev-server",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "autoprefixer": "^10.0.1",
+    "babel-loader": "^8.2.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-latest": "^6.24.1",
+    "css-loader": "^5.0.1",
+    "ejs": "^3.1.5",
+    "ejs-loader": "^0.5.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.0",
+    "image-webpack-loader": "^",
+    "mini-css-extract-plugin": "^0.7.0",
+    "node-sass": "^5.0.0",
+    "postcss-loader": "^4.0.4",
+    "sass-loader": "^10.0.5",
+    "style-loader": "^2.0.0",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.7.2"
+  }
+}

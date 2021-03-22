@@ -7,6 +7,8 @@
 
 
 
+
+
 ## 主要开发依赖
 ```bash
 - postcss-loader / autoprefixer: 添加css兼容性前缀
@@ -28,16 +30,26 @@
 
 
 ## 下载
+```bash
 git clone https://github.com/xiaominglin789/demo-news.git
+```
+
+
+## 安装依赖
+```bash
+npm install
+or
+cnpm
+```
 
 
 ## 调试
+```bash
 npm run dev
-or
-yarn dev
+```
 
 
 ## 打包 => ./dist
+```bash
 npm run build
-or 
-yarn build
+```

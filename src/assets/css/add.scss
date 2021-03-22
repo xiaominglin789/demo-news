@@ -1,0 +1,15 @@
+.app {
+  width: 600px;
+  height: 360px;
+  background: orange;
+  display: flex;
+  align-items: center;
+  .test {
+    background: green;
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      transform: rotate(30deg);
+    }
+  }
+}

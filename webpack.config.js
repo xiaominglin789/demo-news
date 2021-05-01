@@ -45,6 +45,10 @@ module.exports = {
       {
         test: /\.tpl$/,
         loader: 'ejs-loader',
+        options: {
+          variable: 'data',
+          esModule: false
+        }
       },
       {
         test: /\.css$/,
@@ -78,12 +82,17 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|ico|woff|eot|svg|ttf)$/i,
+        test: /\.(png|jpg|jpeg|gif|ico|svg)$/i,
         use: [
           'url-loader?limit=1024&name=/static/img/[name]-[hash:16].[ext]',
           'image-webpack-loader',
         ],
       },
+      {
+        // 处理字体: font字体
+        test: /\.(woff|woff2|eot|ttf)$/i,
+        loader: 'url-loader?name=/static/font/[name].[ext]'
+      }
     ],
   },
   plugins: [
@@ -143,9 +152,12 @@ module.exports = {
     host: 'localhost',
     port: 3000,
     proxy: {
-      '/simpleWeather': {
-        target: 'http://apis.juhe.cn',
+      '/api': {
+        target: 'http://v.juhe.cn/toutiao',
         changeOrigin: true,
+        pathRewrite: {
+          "^/api": "",
+        },
       },
     },
   },

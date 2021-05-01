@@ -1,0 +1,5 @@
+import "./import";
+
+((doc) => {
+  
+})(document);

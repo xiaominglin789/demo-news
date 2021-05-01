@@ -1,4 +1,4 @@
 export default {
-  BASE_API: 'http://apis.juhe.cn',
-  APIKEY: '3b0ec96c5a0fa7739cf2ba49a2e5f1e4',
+  BASE_API: 'http://v.juhe.cn/toutiao',
+  APIKEY: 'd7c5375443c736e1e3487b38b288525a',
 }

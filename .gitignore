@@ -1,2 +1,4 @@
 node_modules
 dist
+# 过滤编辑器配置
+.vscode

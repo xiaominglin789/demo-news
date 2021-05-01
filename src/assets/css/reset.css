@@ -46,12 +46,17 @@ textarea {
   margin: 0;
 }
 
+a, a:active, a:hover, a:focus {
+  text-decoration: none;
+}
+
 html {
   box-sizing: border-box;
 }
 
 * {
   box-sizing: inherit;
+  font-size: 16px;
 }
 *:before,
 *:after {

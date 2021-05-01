@@ -29,6 +29,17 @@
 ```
 
 
+## 识别 async、await语法, 使用`babel-plugin-transform-runtime`
+```bash
+# 默认配置
+"absoluteRuntime": false,
+"corejs": false, // false <=对应=> @babel/runtime
+"helpers": true,
+"regenerator": true,
+"useESModules": false, // babel转es5是不开启es6模块导包的
+```
+
+
 ## 下载
 ```bash
 git clone https://github.com/xiaominglin789/demo-news.git

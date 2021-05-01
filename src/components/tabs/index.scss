@@ -1,0 +1,30 @@
+.tabs {
+    width: 100%;
+    white-space: nowrap;
+    overflow-x: auto;
+    .tab {
+        width: 72px;
+        height: 48px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        padding: 0 4px;
+        cursor: pointer;
+        position: relative;
+    }
+    .tab.active {
+        color: orange;
+    }
+    .tab.active::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 2px;
+        background-color: orange;
+        border-radius: 2px;
+    }
+}

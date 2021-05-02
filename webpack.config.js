@@ -149,6 +149,7 @@ module.exports = {
       ignored: /node_modules/,
     },
     open: true,
+    hot: true,
     host: 'localhost',
     port: 3000,
     proxy: {

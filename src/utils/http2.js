@@ -22,17 +22,24 @@ class HttpHelper {
   }
 
   post(url, data) {
-    let _data = data;
+    let content = "";
     if (
-      Object.prototype.toString.call(_data) === '[object Object]' &&
-      Object.keys(_data).length >= 0
+      Object.prototype.toString.call(data) === '[object Object]' &&
+      Object.keys(data).length >= 0
     ) {
       // 写入 第三方接口 key
-      _data.key = config.APIKEY;
-      _data = JSON.stringify(_data);
+      data['key'] = config.APIKEY;
+      for (const key in data) {
+        content += key + '=' + data[key] + '&';
+      }
+      content = content.substring(0, content.length-1);
     }
 
-    return this.__request(this.methodType.POST, url, _data);
+    url = process.env.NODE_ENV === 'production'
+      ? config.BASE_API + url
+      : config.BASE_API_DEV_FIX + url;
+
+    return this.__request(this.methodType.POST, url, content);
   }
 
   delete(url, params) {
@@ -40,6 +47,11 @@ class HttpHelper {
   }
 
   put(url, data) {
+
+    url = process.env.NODE_ENV === 'production'
+      ? config.BASE_API + url
+      : config.BASE_API_DEV_FIX + url;
+
     return this.__request(
       this.methodType.PUT,
       url,
@@ -58,12 +70,14 @@ class HttpHelper {
   __request(method, url, data = null) {
     return new Promise((resolve, reject) => {
       this.xhr.open(method, url);
-      data &&
-        this.xhr.setRequestHeader(
-          'Content-type',
-          'application/x-www-form-urlencoded',
-        );
+      
+      data && this.xhr.setRequestHeader(
+        'Content-type',
+        'application/x-www-form-urlencoded',
+      );
+
       this.xhr.send(data);
+      // 响应处理
       this.xhr.onreadystatechange = () => {
         if (this.xhr.readyState === 4) {
           const statusCode = this.xhr.status;
@@ -83,14 +97,15 @@ class HttpHelper {
   /** 请求参数转query */
   __formatUrlForQuery(url, params) {
     let _url = this.__apendUrl(url);
+    
     if (Object.prototype.toString.call(params) === '[object Object]') {
       for (const key in params) {
         _url += '&' + key + '=' + params[key];
       }
     }
-    if (Object.prototype.toString.call(params) === '[objct String]') {
-      // TODO 参数纯字符,则不处理,此处未来可能有需求
-    }
+    // if (Object.prototype.toString.call(params) === '[objct String]') {
+    //   // TODO 参数纯字符,则不处理,此处未来可能有需求
+    // }
     return _url;
   }
 
@@ -102,8 +117,8 @@ class HttpHelper {
   __apendUrl(url) {
     return process.env.NODE_ENV === 'production'
       ? config.BASE_API + url + '?key=' + config.APIKEY
-      : url + '?key=' + config.APIKEY
+      : config.BASE_API_DEV_FIX + url + '?key=' + config.APIKEY
   }
 }
 
-export default new HttpHelper()
+export default HttpHelper;

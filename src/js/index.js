@@ -1,39 +1,47 @@
 import "./import";
 import { NEWS_TYPE, ENUM_NEWS_TYPE } from "../data";
-import { getNewsList } from "../api/api";
+import LocalStorageHelper from "../utils/localStorage";
+import { windowScrollToTop } from "../utils/utils";
+import HomeModule from "../api/home";
 import ComHeader from "../components/header";
 import ComTabs from "../components/tabs";
 import ComList from "../components/list";
-import LocalStorageHelper from "../utils/localStorage";
 
 ((doc) => {
   const state = {
-    currentTabName: NEWS_TYPE[0].name,
-    data: {}, // type: { list, page, size }
-    page: 1,
-    size: 30,
+    config: {
+      type: ENUM_NEWS_TYPE.TOP, // 当前切换的tab栏
+      count: 10, // 每次请求10条,
+      pageNum: 0, // 当前type-tab请求的页数
+    },
+    data: {}, // top: [],guonei: [] ...
+    appDom: doc.querySelector("#app"), // 页面主节点
+    listParentDom: null, // 列表父组件节点
   }
-  const appDom = doc.querySelector("#app");
 
   const init = async () => {
-    await initListData();
+    // 绑定系统级别的事件: 页面关闭时,清理一次有时效的记录缓存
+    window.addEventListener('beforeunload', e => {
+      LocalStorageHelper.clearHasExpiredCache();
+      return 1;
+    });
 
+    // 渲染主骨架
     render();
     
+    // 请求页面基础数据
+    await setListData();
+
+    // 绑定事件
     bindEvent();
   }
 
   /** 事件绑定处理 */
   const bindEvent = () => {
     ComTabs.bindEvent(changeTabCallback);
-
-    // 页面关闭时,清理一次有时效的记录缓存
-    window.addEventListener('beforeunload', e => {
-      LocalStorageHelper.clearHasExpiredCache();
-      return 1;
-    })
   }
 
+  /** 渲染主骨架 */
   const render = () => {
     /** 添加头区 */
     const headerTplStr = ComHeader.tpl({
@@ -42,44 +50,57 @@ import LocalStorageHelper from "../utils/localStorage";
       title: "新闻列表",
       showLeftIcon: false,
       showRightIcon: true,
+      isFixed: true,
+      top: 0,
+      background: "#fff"
     })
-    appDom.innerHTML += headerTplStr;
     
     /** tabs栏 */
     const tabsTplStr = ComTabs.tpl({
       tabs: NEWS_TYPE,
-      childWidth: '80'
+      childWidth: '80',
+      isFixed: true,
+      top: 48,
+      background: "#fff"
     });
-    appDom.innerHTML += tabsTplStr;
 
-    console.log("数据: ", state.data[state.currentTabName]);
+    const comListParent = ComList.tplParent({
+      top: 48+32
+    });
     
-    /** 添加内容区 */
-    if (!state.data[state.currentTabName]) return;
-    
-    if (state.data[state.currentTabName]["list"].length > 0) {
-      const listStr = ComList.tpl({
-        list: state.data[state.currentTabName]["list"],
-      });
-      appDom.innerHTML += listStr;
-    }
+    // 子组件填充
+    state.appDom.innerHTML += (headerTplStr + tabsTplStr + comListParent);
 
-    /** 添加尾部区 */
+    // 找出列表父节点
+    state.listParentDom = doc.querySelector(".com-list");
   }
 
-  /** 页面数据请求初始化 */
-  const initListData = async () => {
-    const res = await getNewsList(state.currentTabName, state.page, state.size);
+  /** 渲染列表 */
+  const renderNewsList = (data, pageNum) => {
+    if (!state.listParentDom) return;
 
-    if (res.error_code === 0) {
-      state.data[state.currentTabName] = {
-        list: [],
-        page: 0,
-        size: 0,
-      };
-      state.data[state.currentTabName].list = res.result.data;
-      state.data[state.currentTabName].page = parseInt(res.result.page || 1);
-      state.data[state.currentTabName].size = parseInt(res.result.pageSize || 30);
+    // 添加列表元素
+    state.listParentDom.innerHTML += ComList.tpl({
+      list: data,
+      pageNum
+    })
+    console.log(state.listParentDom);
+    ComList.showListImg();
+  }
+
+  /** 数据请求 */
+  const setListData = async () => {
+    const { type, count } = state.config;
+    const result = await HomeModule.getNewsList(type, count);
+    
+    if (state.data[type]) {
+      return;
+    } else {
+      // 新项
+      state.data[type] = result;
+      console.log("数据: ", state.data);
+
+      renderNewsList(state.data[type][0], 0);
     }
   }
 
@@ -89,62 +110,10 @@ import LocalStorageHelper from "../utils/localStorage";
    * @returns 
    */
   const changeTabCallback = async (tabName) => {
-    console.log("触发 tabName : ", tabName);
-    if (!tabName || tabName === state.currentPage) return;
-
-    // 切换tab栏
-    state.currentTabName = tabName;
-    console.log("tab name: ", state.currentTabName);
-
-    // 页面scroll滚动重置
-    setTimeout(()=>{
-        window.scrollTo(0, 0);
-    }, 0);
-    
-    // return;
-
-    // 请求
-    const has = Object.keys(state.data).includes(tabName);
-    if (!has) {
-      // 新选项-初始化
-      state.data[tabName] = {
-        list: [],
-        page: 0,
-        size: 0,
-      };
-    }
-
-    const res = await getNewsList(state.currentTabName, state.data[tabName].page + 1, state.size);
-    if (res.error_code === 0) {
-      state.data[tabName].list = [...res.result.data, ...state.data[tabName].list];
-      state.data[tabName].page = parseInt(res.result.page);
-      state.data[tabName].size = parseInt(res.result.pageSize);
-      
-      // 数据加载重新完毕-重新渲染list子页面
-      resetListRender();
-    }
+    console.log("切换tab: ", tabName);
+    windowScrollToTop();
   }
 
-  /** 重新渲染list */
-  const resetListRender = () => {
-    /** 添加内容区 */
-    const oldListDom = document.querySelector(".com-list");
-    console.log("旧节点: ", oldListDom);
-    appDom.removeChild(oldListDom);
-
-    if (!state.data[state.currentTabName]) return;
-
-    if (state.data[state.currentTabName]["list"].length > 0) {
-      const listStr = ComList.tpl({
-        list: state.data[state.currentTabName]['list'],
-      });
-      appDom.innerHTML += listStr;
-    }
-
-    /** 为何旧的列表节点被删除后, tabs点击回调失效了？ 他们有什么关联的地方??? */
-    /** 重新绑定 tabs 点击事件才用? */
-    ComTabs.bindEvent(changeTabCallback);
-  }
   
   init();
 })(document);

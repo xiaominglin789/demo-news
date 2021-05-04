@@ -1,4 +1,4 @@
-<header class="header">
+<header class="com-header" style="{{ fixedStyle }}">
     <span class="btn left" style="display: {{ showLeftIcon }}">
         <a href="{{ leftUrl }}" class="icon">
           <i class="iconfont icon-fanhui"></i>

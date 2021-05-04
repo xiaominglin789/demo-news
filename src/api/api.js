@@ -10,7 +10,7 @@ import { NEWS_TYPE } from '../data';
  * @returns 
  */
 export const getNewsList = (type=NEWS_TYPE[0].name, page=1, pageSize=30) =>
-  HttpHelper.get('/api/index', { type, page, page_size: pageSize });
+  HttpHelper.get('/index', { type, page, page_size: pageSize });
 
 /**
  * 根据 uniquekey字符串 获取新闻详情
@@ -20,5 +20,5 @@ export const getNewsList = (type=NEWS_TYPE[0].name, page=1, pageSize=30) =>
 export const getDetail = (uniquekey) => {
   if (uniquekey) { throw new Error('uniquekey 为必传参数.'); }
 
-  return HttpHelper.post('/api/content', { uniquekey });
+  return HttpHelper.post('/content', { uniquekey });
 }

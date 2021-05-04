@@ -6,8 +6,9 @@ import { templateReplace } from "../../utils/utils";
 export default {
     name: "ComTabs",
     activeTabIndex: 0,
+    /** 子组件渲染 */
     tpl(options) {
-        const { tabs, childWidth } = options;
+        const { tabs, childWidth, isFixed, top, background } = options;
         let tabsDom = "";
         const childDomWidth = childWidth + "px";
         /** 先填充子项数据 */
@@ -18,18 +19,28 @@ export default {
                 active: this.activeTabIndex === index ? 'active' : '' });
         });
 
-        return templateReplace(tpl, { tabsDom });
-    },
-    bindEvent(callback) {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxx");
-        const tabChildDoms = document.querySelectorAll(".tab");
-        const tabsDom = document.querySelector(".tabs");
+        let fixedStyle = "";
+        /** 是否开启头部定位 */
+        if (isFixed) {
+            if (isFixed) {
+                fixedStyle = "position: fixed; top: " + (top||0) + "px;";
+            }
+        }
+        if (background) {
+            fixedStyle += ";background-color: " + background;
+        }
 
-        tabsDom.addEventListener('click', this.__setNav.bind(this, tabChildDoms, callback), false);
+        return templateReplace(tpl, { tabsDom, fixedStyle });
+    },
+    /** 子组件事件处理 */
+    bindEvent(changeTabName) {
+        const tabChildDoms = document.querySelectorAll(".tab");
+        const tabsDom = document.querySelector(".com-tabs");
+
+        tabsDom.addEventListener('click', this.__setNavTab.bind(this, tabChildDoms, changeTabName), false);
     },
     /** 切换tab选项 */
-    __setNav(items, callback) {
-        console.log("+++++++++++++++++++");
+    __setNavTab(items, changeTabName) {
         const targetDom = arguments[2].target;
 
         if ("tab" === targetDom.className.trim()) {
@@ -41,8 +52,7 @@ export default {
 
             // 后调执行, 点击项的dataset.name 传给外部调用方作处理、
             const tabName = targetDom.dataset.name;
-            console.log("-----------------------");
-            callback(tabName);
+            changeTabName(tabName);
         }
     }
 }

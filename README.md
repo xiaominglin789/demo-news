@@ -3,7 +3,28 @@
 - 优势: webpack4工程化构建
 
 
+
+
+
 ## 在线浏览地址
+
+
+
+
+
+## 项目工程化 与 项目架构
+- 1.项目工程化(开发版和线上版分离的方案)
+    + 开发原则: 结构、样式、逻辑分离(html、css、js分离) => 分开-好维护(易读易改)
+    + 开发版本(结构样式逻辑分离) --工程化打包(转化)--> 线上版本(减少资源http请求-内联主要css、内联主要js)
+        - 线上版本: 性能、速度、效率
+        - 开发版本: 结构、样式、逻辑分离
+    + 工程化工具(webpack / vite): 
+        - 1.css预处理(sass/less) 转 css
+        - 2.es6+ 转 es5
+        - 3.代码空格/注释/换行去掉 => 代码压缩
+- 2.项目架构
+    + 统一规范项目目录
+
 
 
 
@@ -29,15 +50,46 @@
 ```
 
 
+
+
+
+
 ## 识别 async、await语法, 使用`babel-plugin-transform-runtime`
 ```bash
+# .babelrc
 # 默认配置
-"absoluteRuntime": false,
-"corejs": false, // false <=对应=> @babel/runtime
-"helpers": true,
-"regenerator": true,
-"useESModules": false, // babel转es5是不开启es6模块导包的
+{
+    "plugins": [
+        [
+            "babel-plugin-transform-runtime",
+            {
+                "absoluteRuntime": false,
+                "corejs": false, // false <=对应=> @babel/runtime
+                "helpers": true,
+                "regenerator": true,
+                "useESModules": false, // babel转es5是不开启es6模块导包的
+            }
+        ]
+    ]
+}
 ```
+
+
+
+
+
+## 图片懒加载
+
+
+
+
+
+
+## 函数限流
+
+
+
+
 
 
 ## 下载
@@ -46,18 +98,31 @@ git clone https://github.com/xiaominglin789/demo-news.git
 ```
 
 
-## 安装依赖
+
+
+
+
+## 安装依赖(请用)
 ```bash
+cd demo-news
 npm install
 or
-cnpm
+cnpm install
 ```
+
+
+
+
 
 
 ## 调试
 ```bash
 npm run dev
 ```
+
+
+
+
 
 
 ## 打包 => ./dist

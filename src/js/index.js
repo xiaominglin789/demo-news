@@ -47,7 +47,7 @@ import ComLoading from "../components/loading";
     /** 添加头区 */
     const headerTplStr = ComHeader.tpl({
       leftUrl: "/",
-      rightUrl: "/collections.html",
+      rightUrl: "./collections.html",
       title: "新闻列表",
       showLeftIcon: false,
       showRightIcon: true,

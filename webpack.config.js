@@ -27,18 +27,20 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: path.resolve(__dirname, 'node_modules'),
-        plugin: [
-          [
-            "babel-plugin-transform-runtime",
-            {
-                "absoluteRuntime": false,
-                "corejs": false,
-                "helpers": true,
-                "regenerator": true,
-                "useESModules": false
-            }
-          ]
-        ]
+        query: {
+          presets: ['latest'],
+          plugins: [
+            [
+              'babel-plugin-transform-runtime',
+              {
+                absoluteRuntime: false,
+                corejs: true,
+                helpers: true,
+                useESModules: false,
+              },
+            ],
+          ],
+        },
       },
       {
         test: /\.tpl$/,
@@ -79,15 +81,7 @@ module.exports = {
           'sass-loader',
         ],
       },
-      {
-        // 处理字体: font字体
-        test: /\.(woff|woff2|eot|ttf)$/i,
-        loader: 'url-loader',
-        options: {
-          name:"[name].[ext]",
-          ontputPath: "/",
-        }
-      },
+      
       {
         test: /\.(png|jpg|jpeg|gif|ico|svg)$/i,
         use: [
@@ -95,14 +89,21 @@ module.exports = {
             loader: 'url-loader',
             options: {
               limit:1024 * 8, // 8k
-              name:"[name]-[hash:16].[ext]",
+              name:"img/[name]-[hash:16].[ext]",
               esModule: false,
-              ontputPath: "/",
             }
           },
           'image-webpack-loader',
         ],
-      }
+      },
+      {
+        // 处理字体: font字体
+        test: /\.(woff|woff2|eot|ttf)$/i,
+        loader: 'url-loader',
+        options: {
+          name:"font/[name].[ext]",
+        }
+      },
     ],
   },
   plugins: [
@@ -147,10 +148,9 @@ module.exports = {
       },
     }),
     new miniCssExtractPlugin({
-
       filename: isProductionMode
-        ? '[name]-[hash:16].css'
-        : '[name].css',
+        ? 'css/[name]-[hash:16].css'
+        : 'css/[name].css',
     }),
   ],
   // 本地webpack服务器配置

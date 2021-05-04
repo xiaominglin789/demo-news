@@ -55,17 +55,17 @@ export default {
     },
     bindEvent(callback) {
     },
+    /**
+     * TODO - 滚动可见区域,才显示图片
+     */
     showListImg() {
+        // TODO
+        return;
         const imgsDom = document.querySelectorAll(".list-img");
-        console.log("imgsDom ", imgsDom);
 
-        // const dateDom = document.querySelectorAll("date");
-        // console.log("dateDom ", dateDom);
-
-        // const infoDom = document.querySelectorAll("info");
-        // console.log("infoDom ", infoDom);
-        // [...imgsDom].forEach((child, index) => {
-        //     lazyImageLoader(child, child.dataset.img);
-        // })
+        // 监听可见区域, 控制 imgsDom 的 opacity 即可
+        const imgsDomHasShow = [...imgsDom].map((child, index) => {
+            return lazyImageLoader(child, child.dataset.img);
+        })
     }
 }

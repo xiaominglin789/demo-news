@@ -66,7 +66,7 @@ class LocalStorageHelper {
         if (!key) return;
 
         const realKey = this.__getKey(key);
-        let val = localStorage.getItem(realKey) || "";
+        let val = localStorage.getItem(realKey) || null;
         
         try {
             val = JSON.parse(val);

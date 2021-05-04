@@ -42,8 +42,10 @@ export default {
     /** 切换tab选项 */
     __setNavTab(items, changeTabName) {
         const targetDom = arguments[2].target;
-
+        
+        // 对点击当前激活的tab 由于已激活的tab.class = "tab active" 是不会触发切换逻辑的
         if ("tab" === targetDom.className.trim()) {
+            console.log(2);
             // 需要切换旧的tab状态和设置新的tab状态
             items[this.activeTabIndex].className = "tab";
 

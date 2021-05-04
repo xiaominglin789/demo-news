@@ -43,7 +43,7 @@ const setPageListFormat = (list, count) => {
 }
 
 /**
- * 图片懒加载
+ * 图片处理
  * @param {*} realImgDom 节点 
  * @param {*} imgUrl 图片地址
  */
@@ -54,7 +54,7 @@ const lazyImageLoader = (realImgDom, imgUrl) => {
     imgVirtual.src = imgUrl;
     
     imgVirtual.onload = () => {
-        dom.src = imgVirtual.src;
+        realImgDom.src = imgVirtual.src;
     }
 }
 

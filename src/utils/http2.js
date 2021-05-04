@@ -71,10 +71,12 @@ class HttpHelper {
     return new Promise((resolve, reject) => {
       this.xhr.open(method, url);
       
-      data && this.xhr.setRequestHeader(
-        'Content-type',
-        'application/x-www-form-urlencoded',
-      );
+      if (method === this.methodType.POST || method === this.methodType.PUT) {
+        data && this.xhr.setRequestHeader(
+          'Content-type',
+          'application/x-www-form-urlencoded',
+        );
+      }
 
       this.xhr.send(data);
       // 响应处理

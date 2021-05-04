@@ -76,6 +76,52 @@
 
 
 
+## webpack + ejs 处理本地图片路径
+前置知识: `/a/b/c.txt` => 绝对路径, `a/b/c.txt` => 相对路径
+- 1.本地图片在 tpl 标签中的使用格式： <img src="<%= require('../../../assets/img/loading.gif') %>">
+- 2.本地图片在 tpl 背景图中的使用格式： <div class="test" style="width:150px;height:90px;background: url(<%= require('../../../assets/img/loading.gif') %>) 50% 50% no-repeat;"></div>
+- 3.webpack module-loader: url-loader 对资源文件打包的路径配置：
+    + webpack 打包的所有资源都在 `dist/`下, 资源查找路径使用 `相对路径` 来找
+    + img图片打包输出路径配置, 请直接在配置 filename 前加上路径,exp: `img/`
+    + 本地图片资源将被打包到 `dist/img/*` 下.
+```javascript
+// `img/`
+{
+    test: /\.(png|jpg|jpeg|gif|ico|svg)$/i,
+    use: [
+        {
+        loader: 'url-loader',
+        options: {
+            limit:1024 * 8, // 8k
+            name:"img/[name]-[hash:16].[ext]",
+            esModule: false,
+        }
+        },
+        'image-webpack-loader',
+    ],
+},
+// `font/`
+{
+    // 处理字体: font字体
+    test: /\.(woff|woff2|eot|ttf)$/i,
+    loader: 'url-loader',
+    options: {
+        name:"font/[name].[ext]",
+    }
+},
+```
+- 4.webpack plugin: miniCssExtractPlugin css 提取成单文件,输出的路径配置同理
+```javascript
+// `css/`
+plugins: {
+    new miniCssExtractPlugin({
+      filename: isProductionMode
+        ? 'css/[name]-[hash:16].css'
+        : 'css/[name].css',
+    }),
+}
+```
+
 
 
 ## 图片懒加载
@@ -102,7 +148,7 @@ git clone https://github.com/xiaominglin789/demo-news.git
 
 
 
-## 安装依赖(请用)
+## 安装依赖(依赖按照失败.请用换cnpm)
 ```bash
 cd demo-news
 npm install

@@ -6,6 +6,7 @@ import HomeModule from "../api/home";
 import ComHeader from "../components/header";
 import ComTabs from "../components/tabs";
 import ComList from "../components/list";
+import ComLoading from "../components/loading";
 
 ((doc) => {
   const state = {
@@ -27,7 +28,7 @@ import ComList from "../components/list";
     });
 
     // 渲染主骨架
-    render();
+    renderOnceInit();
     
     // 请求页面基础数据
     await setListData();
@@ -42,7 +43,7 @@ import ComList from "../components/list";
   }
 
   /** 渲染主骨架 */
-  const render = () => {
+  const renderOnceInit = () => {
     /** 添加头区 */
     const headerTplStr = ComHeader.tpl({
       leftUrl: "/",
@@ -64,14 +65,20 @@ import ComList from "../components/list";
       background: "#fff"
     });
 
+    /** 列表父容器 */
     const comListParent = ComList.tplParent({
       top: 48+32
     });
-    
-    // 子组件填充
-    state.appDom.innerHTML += (headerTplStr + tabsTplStr + comListParent);
 
-    // 找出列表父节点
+    /** 加载中的组件 */
+    const comLoadingStr = ComLoading.tpl({
+      top: 48+32
+    });
+
+    // 子组件填充
+    state.appDom.innerHTML += (headerTplStr + tabsTplStr + comListParent + comLoadingStr);
+
+    // 设置列表父节点
     state.listParentDom = doc.querySelector(".com-list");
   }
 
@@ -84,24 +91,43 @@ import ComList from "../components/list";
       list: data,
       pageNum
     })
-    console.log(state.listParentDom);
+    // 展示图片
     ComList.showListImg();
   }
 
-  /** 数据请求 */
+  /** 设置列表数据 */
   const setListData = async () => {
     const { type, count } = state.config;
-    const result = await HomeModule.getNewsList(type, count);
     
     if (state.data[type]) {
+      // 已有项
+      console.log("已有项", state.data[type]);
+      renderNewsList(state.data[type][state.config.pageNum], state.config.pageNum);
       return;
-    } else {
-      // 新项
-      state.data[type] = result;
-      console.log("数据: ", state.data);
-
-      renderNewsList(state.data[type][0], 0);
     }
+
+    // 新项
+    resetStateConfig(type);
+    
+    // 加载中图片 展示
+    ComLoading.show();
+    const result = await HomeModule.getNewsList(type, count);
+    if (result) {
+      // 加载中图片 隐藏
+      ComLoading.hidden();
+      state.data[type] = result;
+      renderNewsList(state.data[type][state.config.pageNum], state.config.pageNum);
+    }
+  }
+
+  /**
+   * 重置请求记录状态配置
+   * @param {String} type 默认 "top"
+   */
+  const resetStateConfig = (type) => {
+    state.config.type = type || ENUM_NEWS_TYPE.TOP
+    state.config.count = 10
+    state.config.pageNum = 0
   }
 
   /**
@@ -111,9 +137,17 @@ import ComList from "../components/list";
    */
   const changeTabCallback = async (tabName) => {
     console.log("切换tab: ", tabName);
+
+    // 切换新tab-1.重置旧的数据配置 2.listParent的内容清空
+    resetStateConfig(tabName);
+    state.listParentDom.innerHTML = "";
+
+    // 滚动条回顶部
     windowScrollToTop();
+
+    // 尝试重新设置列表数据
+    setListData();
   }
 
-  
   init();
 })(document);

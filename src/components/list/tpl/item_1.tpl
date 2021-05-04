@@ -6,5 +6,5 @@
             <p class="date">{{ date }}</p>
         </span>
     </div>
-    <img src="<%= require('../../../assets/img/loading.gif') %>" data-img="{{ thumbnail_pic_s }}" class="list-img"/>
+    <img src="<%= require('../../../assets/img/default.gif') %>" data-img="{{ thumbnail_pic_s }}" class="list-img"/>
 </div>

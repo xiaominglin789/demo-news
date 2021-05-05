@@ -1,7 +1,7 @@
 import "./import";
 import { NEWS_TYPE, ENUM_NEWS_TYPE } from "../data";
 import LocalStorageHelper from "../utils/localStorage";
-import { windowScrollToTop } from "../utils/utils";
+import { throttle, windowScrollTo } from "../utils/utils";
 import HomeModule from "../api/home";
 import ComHeader from "../components/header";
 import ComTabs from "../components/tabs";
@@ -10,6 +10,9 @@ import ComLoading from "../components/loading";
 
 ((doc) => {
   const state = {
+    clientViewHeight: window.innerHeight || 
+      document.body.clientWidth || 
+      document.documentElement.clientHeight, // 屏幕可视区高度
     config: {
       type: ENUM_NEWS_TYPE.TOP, // 当前切换的tab栏
       count: 10, // 每次请求10条,
@@ -40,6 +43,9 @@ import ComLoading from "../components/loading";
   /** 事件绑定处理 */
   const bindEvent = () => {
     ComTabs.bindEvent(changeTabCallback);
+
+    // window滚动事件
+    window.onscroll = throttle(ComList.showListImg.bind(null, state.clientViewHeight), 500);
   }
 
   /** 渲染主骨架 */
@@ -85,14 +91,14 @@ import ComLoading from "../components/loading";
   /** 渲染列表 */
   const renderNewsList = (data, pageNum) => {
     if (!state.listParentDom) return;
-
     // 添加列表元素
     state.listParentDom.innerHTML += ComList.tpl({
       list: data,
       pageNum
     })
-    // 展示图片
-    ComList.showListImg();
+
+    // 触发细微滚动,让懒加载图片在首屏区先显示
+    windowScrollTo(0, 1);
   }
 
   /** 设置列表数据 */
@@ -143,7 +149,7 @@ import ComLoading from "../components/loading";
     state.listParentDom.innerHTML = "";
 
     // 滚动条回顶部
-    windowScrollToTop();
+    windowScrollTo(0, 0);
 
     // 尝试重新设置列表数据
     setListData();

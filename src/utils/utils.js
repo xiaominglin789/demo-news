@@ -14,12 +14,17 @@ const templateReplace = (template, options) => {
     });
 }
 
-/** window滚动条回到顶部 */
-const windowScrollToTop = () => {
+/**
+ * window滚动条回到(x,y)处
+ * @param {Number} x 纵坐标 默认 0
+ * @param {Number} y 横坐标 默认 0
+ * @param {Number} delay 延迟时间, 单位:ms 默认 0
+ */
+const windowScrollTo = (x = 0, y = 0, delay = 0) => {
     // 时机控制: event-loop => dom渲染 > 微任务 > 宏任务
     setTimeout(() => {
-        window.scrollTo(0, 0); // 搜索浏览器 不支持 scrollTo({...}) 的写法
-    }, 0);
+        window.scrollTo(x, y); // 搜索浏览器 不支持 scrollTo({...}) 的写法
+    }, delay);
 }
 
 /**
@@ -34,7 +39,7 @@ const setPageListFormat = (list, count) => {
     let pageList = [];
     let index = 0;
     // 循环拆分
-    while(index < len) {
+    while (index < len) {
         pageList.push(list.slice(index, (index + count)));
         index += count;
     }
@@ -43,24 +48,80 @@ const setPageListFormat = (list, count) => {
 }
 
 /**
- * 图片处理
- * @param {*} realImgDom 节点 
- * @param {*} imgUrl 图片地址
+ * 防抖函数
+ * 1.是否首次延迟执行
+ * 2.n秒频繁触发事件,计时器会频繁重新开始计时
+ * @param {*} func 函数
+ * @param {*} delay 延迟时间, 默认 300ms
+ * @param {*} immediately 是否开启立刻执行一次函数, 默认 false
+ * @returns 
  */
-const lazyImageLoader = (realImgDom, imgUrl) => {
-    if (!imgUrl || !realImgDom) return;
+function debounce(func, delay = 300, immediately = false) {
+    let timer = null;
+    let result = null;
+    // 检查函数
+    if (typeof func !== 'function') {
+        throw new TypeError('func not a function');
+    }
 
-    const imgVirtual = new Image();
-    imgVirtual.src = imgUrl;
-    
-    imgVirtual.onload = () => {
-        realImgDom.src = imgVirtual.src;
+    const debouncer = function () {
+        const _this = this;
+        const _args = arguments;
+
+        if (timer) clearTimeout(timer);
+
+        if (immediately) {
+            // 立刻执行
+            const exec = !timer;
+            // 延迟操作
+            timer = setTimeout(() => {
+                timer = null;
+            }, delay);
+            // 立刻执行函数
+            if (exec) {
+                result = func.apply(_this, _args);
+            }
+        } else {
+            // 正常逻辑
+            timer = setTimeout(() => {
+                result = func.apply(_this, _args);
+            }, delay);
+        }
+        return result;
+    }
+
+    return debouncer;
+}
+
+/**
+ * 节流函数
+ * @param {Function} func 函数
+ * @param {Number} delay 延迟时间, 默认 300ms
+ */
+function throttle(func, delay = 300) {
+    let timer;
+    // 检查函数
+    console.log(func);
+    if (typeof func !== 'function') {
+        throw new TypeError('func not a function');
+    }
+    return function () {
+        let that = this;
+        let args = arguments;
+
+        if (!timer) {
+            timer = setTimeout(() => {
+                timer = null;
+                func.apply(that, args);
+            }, delay);
+        }
     }
 }
 
 export {
     templateReplace,
-    windowScrollToTop,
+    windowScrollTo,
     setPageListFormat,
-    lazyImageLoader,
+    debounce,
+    throttle,
 }

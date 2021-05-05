@@ -56,16 +56,29 @@ export default {
     bindEvent(callback) {
     },
     /**
-     * TODO - 滚动可见区域,才显示图片
+     * 滚动可见区域,才显示图片
      */
-    showListImg() {
-        // TODO
-        return;
-        const imgsDom = document.querySelectorAll(".list-img");
+    showListImg(clientViewHeight) {
+        if (!clientViewHeight) { 
+            clientViewHeight = window.innerHeight || 
+                document.body.clientWidth || 
+                document.documentElement.clientHeight
+        }
 
+        const imgsDom = document.querySelectorAll(".list-img");
         // 监听可见区域, 控制 imgsDom 的 opacity 即可
-        const imgsDomHasShow = [...imgsDom].map((child, index) => {
-            return lazyImageLoader(child, child.dataset.img);
+        [...imgsDom].forEach((child) => {
+            // 图片可视边界
+            const curRect = child.getBoundingClientRect();
+            if (curRect.top < clientViewHeight && curRect.bottom > 0) {
+                // 满足可视区域内才加载对应的图片
+                const temp = new Image();
+                temp.src = child.dataset.img;
+                temp.onload = () => {
+                    child.src = temp.src;
+                }
+            }
         })
+        
     }
 }

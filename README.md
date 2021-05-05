@@ -125,13 +125,110 @@ plugins: {
 
 
 ## 图片懒加载
+```javascript
+/**
+ * 滚动可见区域,才显示图片
+ */
+showListImg(clientViewHeight) {
+    if (!clientViewHeight) { 
+        clientViewHeight = window.innerHeight || 
+            document.body.clientWidth || 
+            document.documentElement.clientHeight
+    }
+
+    const imgsDom = document.querySelectorAll(".list-img");
+    // 监听可见区域, 控制 imgsDom 的 opacity 即可
+    [...imgsDom].forEach((child) => {
+        // 图片可视边界
+        const curRect = child.getBoundingClientRect();
+        if (curRect.top < clientViewHeight && curRect.bottom > 0) {
+            // 满足可视区域内才加载对应的图片
+            const temp = new Image();
+            temp.src = child.dataset.img;
+            temp.onload = () => {
+                child.src = temp.src;
+            }
+        }
+    })
+}
+```
 
 
 
 
+## 函数限流防抖
+```javascript
+/**
+ * 防抖函数
+ * 1.是否首次延迟执行
+ * 2.n秒频繁触发事件,计时器会频繁重新开始计时
+ * @param {*} func 函数
+ * @param {*} delay 延迟时间, 默认 300ms
+ * @param {*} immediately 是否开启立刻执行一次函数, 默认 false
+ * @returns 
+ */
+function debounce(func, delay = 300, immediately = false) {
+    let timer = null;
+    let result = null;
+    // 检查函数
+    if (typeof func !== 'function') {
+        throw new TypeError('func not a function');
+    }
 
+    const debouncer = function () {
+        const _this = this;
+        const _args = arguments;
 
-## 函数限流
+        if (timer) clearTimeout(timer);
+
+        if (immediately) {
+            // 立刻执行
+            const exec = !timer;
+            // 延迟操作
+            timer = setTimeout(() => {
+                timer = null;
+            }, delay);
+            // 立刻执行函数
+            if (exec) {
+                result = func.apply(_this, _args);
+            }
+        } else {
+            // 正常逻辑
+            timer = setTimeout(() => {
+                result = func.apply(_this, _args);
+            }, delay);
+        }
+        return result;
+    }
+
+    return debouncer;
+}
+
+/**
+ * 节流函数
+ * @param {Function} func 函数
+ * @param {Number} delay 延迟时间, 默认 300ms
+ */
+function throttle(func, delay = 300) {
+    let timer;
+    // 检查函数
+    console.log(func);
+    if (typeof func !== 'function') {
+        throw new TypeError('func not a function');
+    }
+    return function () {
+        let that = this;
+        let args = arguments;
+
+        if (!timer) {
+            timer = setTimeout(() => {
+                timer = null;
+                func.apply(that, args);
+            }, delay);
+        }
+    }
+}
+```
 
 
 
@@ -142,7 +239,6 @@ plugins: {
 ```bash
 git clone https://github.com/xiaominglin789/demo-news.git
 ```
-
 
 
 

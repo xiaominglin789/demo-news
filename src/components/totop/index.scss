@@ -1,0 +1,15 @@
+.com-totop {
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    z-index: 99;
+    transform: rotateZ(90deg);
+    font-size: 18px;
+    background-color: rgba($color: #000, $alpha: .7);
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+    color: #fff;
+}

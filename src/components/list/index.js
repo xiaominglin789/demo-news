@@ -3,16 +3,19 @@ import item0Tpl from "./tpl/item_0.tpl";
 import item1Tpl from "./tpl/item_1.tpl";
 import item2Tpl from "./tpl/item_2.tpl";
 import item3Tpl from "./tpl/item_3.tpl";
-import { lazyImageLoader, templateReplace } from "../../utils/utils";
+import { lazyImageLoader, templateReplace, __getClientViewHeight } from "../../utils/utils";
 import "./index.scss";
 
 export default {
     name: "ComList",
+    toTopDom: null,
     tpl(options) {
         const { list, pageNum } = options
         let listChildsStr = "";
         let tplVar = item0Tpl;
-
+        
+        if (!list || !list.length) return "";
+        
         list.forEach(({
             thumbnail_pic_s,
             thumbnail_pic_s02,
@@ -53,19 +56,16 @@ export default {
         const { top } = options
         return templateReplace(tpl, { listDomStr: "", top })
     },
-    bindEvent(callback) {
-    },
     /**
      * 滚动可见区域,才显示图片
      */
     showListImg(clientViewHeight) {
         if (!clientViewHeight) { 
-            clientViewHeight = window.innerHeight || 
-                document.body.clientWidth || 
-                document.documentElement.clientHeight
+            clientViewHeight = __getClientViewHeight();
         }
 
         const imgsDom = document.querySelectorAll(".list-img");
+
         // 监听可见区域, 控制 imgsDom 的 opacity 即可
         [...imgsDom].forEach((child) => {
             // 图片可视边界

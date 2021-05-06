@@ -101,7 +101,6 @@ function debounce(func, delay = 300, immediately = false) {
 function throttle(func, delay = 300) {
     let timer;
     // 检查函数
-    console.log(func);
     if (typeof func !== 'function') {
         throw new TypeError('func not a function');
     }
@@ -118,10 +117,30 @@ function throttle(func, delay = 300) {
     }
 }
 
+/** 获取滚动区的总高度 */
+const __getBodyScrollHeight = () => {
+    return document.body.scrollHeight || document.documentElement.scrollHeight;
+}
+
+/** 获取屏幕可视区的高度 */
+const __getClientViewHeight = () => {
+    return window.innerHeight || 
+    document.body.clientWidth || 
+    document.documentElement.clientHeight // 屏幕可视区高度
+}
+
+/** 获取滚动时到顶部的高度 */
+const __getVarScrollTop = () => {
+    return document.documentElement.scrollTop || document.body.scrollTop;
+}
+
 export {
     templateReplace,
     windowScrollTo,
     setPageListFormat,
     debounce,
     throttle,
+    __getBodyScrollHeight,
+    __getClientViewHeight,
+    __getVarScrollTop
 }

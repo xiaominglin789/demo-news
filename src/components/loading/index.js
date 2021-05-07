@@ -4,19 +4,25 @@ import { templateReplace } from "../../utils/utils";
 
 export default {
     name: "ComLoading",
+    loadingDom: null,
+    loadingClassName: "loading-box",
     tpl(options) {
         const {top} = options;
-
         return templateReplace(tpl, {
             display: "none",
             top
         });
     },
     show() {
-        console.log(document.querySelector(".loading-box"));
-        document.querySelector(".loading-box").style.display = "block";
+        if (!this.loadingDom) {
+            this.loadingDom = document.querySelector("."+this.loadingClassName);
+        }
+        this.loadingDom.style.display = "block";
     },
     hidden() {
-        document.querySelector(".loading-box").style.display = "none";
+        if (!this.loadingDom) {
+            this.loadingDom = document.querySelector("."+this.loadingClassName);
+        }
+        this.loadingDom.style.display = "none";
     }
 }

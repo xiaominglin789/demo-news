@@ -6,8 +6,6 @@
     </span>
     <span class="title">{{ title }}</span>
     <span class="btn right" style="display: {{ showRightIcon }}">
-        <a href="{{ rightUrl }}">
-          <i class="iconfont icon-yanchurili"></i>
-        </a>
+        <i class="iconfont {{ rightIcon }}"></i>
     </span>
 </header>

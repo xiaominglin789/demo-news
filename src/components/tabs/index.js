@@ -6,6 +6,8 @@ import { templateReplace } from "../../utils/utils";
 export default {
     name: "ComTabs",
     activeTabIndex: 0,
+    tabsClassName: "com-tabs",
+    tabsChildClassName: "tab",
     /** 子组件渲染 */
     tpl(options) {
         const { tabs, childWidth, isFixed, top, background } = options;
@@ -34,8 +36,8 @@ export default {
     },
     /** 子组件事件处理 */
     bindEvent(changeTabName) {
-        const tabChildDoms = document.querySelectorAll(".tab");
-        const tabsDom = document.querySelector(".com-tabs");
+        const tabChildDoms = document.querySelectorAll("." + this.tabsChildClassName);
+        const tabsDom = document.querySelector("." + this.tabsClassName);
 
         tabsDom.addEventListener('click', this.__setNavTab.bind(this, tabChildDoms, changeTabName), false);
     },
@@ -44,16 +46,16 @@ export default {
         const targetDom = arguments[2].target;
         
         // 对点击当前激活的tab 由于已激活的tab.class = "tab active" 是不会触发切换逻辑的
-        if ("tab" === targetDom.className.trim()) {
-            console.log(2);
+        if (this.tabsChildClassName === targetDom.className.trim()) {
             // 需要切换旧的tab状态和设置新的tab状态
-            items[this.activeTabIndex].className = "tab";
+            items[this.activeTabIndex].className = this.tabsChildClassName;
 
             targetDom.className += " active";
             this.activeTabIndex = targetDom.dataset.index;
 
             // 后调执行, 点击项的dataset.name 传给外部调用方作处理、
             const tabName = targetDom.dataset.name;
+            // 执行切换回调
             changeTabName(tabName);
         }
     }

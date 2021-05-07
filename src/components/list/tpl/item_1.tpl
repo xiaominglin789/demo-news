@@ -1,4 +1,4 @@
-<div class="com-list-item list-1" data-page="{{ pageNum }}" data-index="{{ index }}">
+<div class="com-list-item list-1" data-page="{{ pageNum }}" data-index="{{ index }}"  data-uniquekey="{{ uniquekey }}" data-url="{{ url }}">
     <div class="content">
         <p class="title">{{ title }}</p>
         <span class="info">

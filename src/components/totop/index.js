@@ -6,13 +6,14 @@ export default {
     name: "ComToTop",
     block: false,
     target: null,
+    totopClassName: "com-totop",
     tpl() {
         return templateReplace(tpl, {
             styleStr: "display: " + (this.block ? "block;" : "none;")
         });
     },
     bindEvent(callback) {
-        this.target = document.querySelector(".com-totop");
+        this.target = document.querySelector("." + this.totopClassName);
         this.target.addEventListener("click", this.__setToTop.bind(this, callback), false);    
     },
     hideToTopIcon() {

@@ -8,7 +8,8 @@ import "./index.scss";
 
 export default {
     name: "ComList",
-    toTopDom: null,
+    childItemClassName: "com-list-item",
+    listItemImgClassName: "list-img",
     tpl(options) {
         const { list, pageNum } = options
         let listChildsStr = "";
@@ -64,7 +65,7 @@ export default {
             clientViewHeight = __getClientViewHeight();
         }
 
-        const imgsDom = document.querySelectorAll(".list-img");
+        const imgsDom = document.querySelectorAll("."+this.listItemImgClassName);
 
         // 监听可见区域, 控制 imgsDom 的 opacity 即可
         [...imgsDom].forEach((child) => {
@@ -77,8 +78,36 @@ export default {
                 temp.onload = () => {
                     child.src = temp.src;
                 }
+                temp.onerror = (e) => {
+                    // 处理图片加载失败, 切换成加载失败的图片
+                }
             }
         })
-        
+    },
+    bindEvent(listParentDom, callback) {
+        if (listParentDom) {
+            listParentDom.addEventListener("click", this.__showNewDetail.bind(this, callback), false);
+        }
+    },
+    /** 点击某个新闻实现跳转 */
+    __showNewDetail(callback) {
+        let target = arguments[1].target;
+        while(target) {
+            if (target.className.split(" ")[0] === this.childItemClassName) {
+                // 找到点击到新闻列表的项,
+                
+                // 新版api可以 直接通过 uniquekey 获取新闻详情
+                // callback(uniquekey);
+
+                // 旧
+                const uniquekey= target.dataset.uniquekey;
+                const page = target.dataset.page;
+                const index = target.dataset.index;
+                callback(page, index);
+                window.location.href = "./detail.html?from=" + window.location.pathname + "&uniquekey=" + uniquekey;
+                break;
+            }
+            target = target.parentNode; // 递归父节点
+        }
     }
 }

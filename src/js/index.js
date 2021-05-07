@@ -4,9 +4,9 @@ import LocalStorageHelper from "../utils/localStorage";
 import {
   throttle,
   windowScrollTo,
-  __getBodyScrollHeight,
-  __getClientViewHeight,
-  __getVarScrollTop
+  checkScrollOverBottom,
+  getClientViewHeight,
+  getScrollTop
 } from "../utils/utils";
 import HomeModule from "../api/home";
 import ComHeader from "../components/header";
@@ -14,19 +14,31 @@ import ComTabs from "../components/tabs";
 import ComList from "../components/list";
 import ComLoading from "../components/loading";
 import ComToTop from "../components/totop";
+import ComLoadMore from "../components/loadmore";
 
 ((doc) => {
   const state = {
-    showToTopMinHeight: 300, // 显示回到顶部拖的最小高度
-    clientViewHeight: __getClientViewHeight(),
+    /** 显示回到顶部拖的最小高度，300px */
+    showToTopMinHeight: 300,
+    /** 配置选项 */
     config: {
-      type: ENUM_NEWS_TYPE.TOP, // 当前切换的tab栏
-      count: 10, // 每次请求10条,
-      pageNum: 0, // 当前type-tab请求的页数
+      /** 当前切换的tab栏 */
+      type: ENUM_NEWS_TYPE.TOP,
+      /** 默认:每次请求10条 */
+      count: 10,
+      /** 当前type-tab请求的页数, 默认 0 */
+      pageNum: 0
     },
-    data: {}, // top: [],guonei: [] ...
-    appDom: doc.querySelector("#app"), // 页面主节点
-    listParentDom: null, // 列表父组件节点
+    /** 缓存列表数据 map: top: [[..],[..],[..]],guonei: [].. */
+    data: {}, 
+    /** 页面主节点 id=app */
+    appDom: doc.querySelector("#app"),
+    /** 列表父组件节点 */
+    listParentDom: null,
+    /** 是否正在加载,处理加载更多时的状态 */
+    loadingStatus: false,
+    /** 加载更多的定时器 */
+    loadMoreTimer: null,
   }
 
   const init = async () => {
@@ -49,26 +61,31 @@ import ComToTop from "../components/totop";
   /** 事件绑定处理 */
   const bindEvent = () => {
     ComTabs.bindEvent(changeTabCallback);
-    ComToTop.bindEvent(changeWindowToTop);
+    ComToTop.bindEvent(windowScrollTo);
+    ComList.bindEvent(state.listParentDom, clickNewDetailCallbackOldBeta);
+    ComHeader.bindEvent(headerRightIconClick);
 
     // window滚动事件
     window.onscroll = throttle(scrollEvent, 500);
   }
 
+  /** 滚动事件 */
   const scrollEvent = async() => {
-    ComList.showListImg(state.clientViewHeight);
-    console.log("滚动: ", __getVarScrollTop());
+    ComList.showListImg(getClientViewHeight());
+
     // 控制回到顶部的图标显示隐藏
-    if (__getVarScrollTop() > state.showToTopMinHeight) {
+    if (getScrollTop() > state.showToTopMinHeight) {
       ComToTop.showToTopIcon();
     } else {
       ComToTop.hideToTopIcon();
     }
 
-    if (__getVarScrollTop() + __getClientViewHeight() + 50  - __getBodyScrollHeight() >= 0) {
-      console.log("到达底部了...");
-      await getMoreList();
-    }
+    checkScrollOverBottom(getMoreList);
+  }
+
+  /** top-bar 右侧按钮被点击 */
+  const headerRightIconClick = (dom) => {
+    window.location.href = "./collections.html"
   }
 
   /** 渲染主骨架 */
@@ -76,7 +93,6 @@ import ComToTop from "../components/totop";
     /** 添加头区 */
     const headerTplStr = ComHeader.tpl({
       leftUrl: "/",
-      rightUrl: "./collections.html",
       title: "新闻列表",
       showLeftIcon: false,
       showRightIcon: true,
@@ -104,6 +120,7 @@ import ComToTop from "../components/totop";
       top: 48+32
     });
 
+    /** 到顶部组件 */
     const comToTopStr = ComToTop.tpl();
 
     // 子组件填充
@@ -126,7 +143,10 @@ import ComToTop from "../components/totop";
   /** 设置列表数据 */
   const setListData = async () => {
     const { type, count } = state.config;
-    
+
+    // 主动触发细微滚动事件,切换tab过程的初始化可见视口内的图片有限加载出来
+    windowScrollTo(0, 2);
+
     if (state.data[type]) {
       // 已有项
       console.log("已有项", state.data[type]);
@@ -134,12 +154,8 @@ import ComToTop from "../components/totop";
       return;
     }
 
-    // 新项
+    // 新tab项: 加载中图片-展示, 渲染
     resetStateConfig(type);
-    // 触发
-    windowScrollTo(0, 1);
-    
-    // 加载中图片 展示
     ComLoading.show();
     const result = await HomeModule.getNewsList(type, count);
     if (result) {
@@ -154,11 +170,31 @@ import ComToTop from "../components/totop";
    * 获取更多
    */
   const getMoreList = async() => {
-    if (state.config.pageNum < 2) {
+    if (!state.loadingStatus) {
+      clearTimeout(state.loadMoreTimer);
+      // 开锁
+      state.loadingStatus = true;
+      // 
       state.config.pageNum++;
-      const newData = state.data[state.config.type][state.config.pageNum];
-      console.log("新数据: ", newData, " 下标: ", state.config.pageNum);
-      renderNewsList(newData, state.config.pageNum);
+      const { pageNum, type} = state.config;
+      // 判断是否已加载到最大页数了
+      if (pageNum >= state.data[type].length) {
+        ComLoadMore.add(state.listParentDom, true);
+      } else {
+        //可以加载更多
+        const newData = state.data[type][pageNum];
+        // 展示加载更多提示
+        ComLoadMore.add(state.listParentDom);
+        // TODO 控制延迟
+        state.loadMoreTimer = setTimeout(() => {
+          // 关锁
+          state.loadingStatus = false;
+          // 到达最大页数
+          // 执行渲染
+          renderNewsList(newData, state.config.pageNum);
+          ComLoadMore.remove(state.listParentDom);
+        }, 1000);
+      }
     }
   }
 
@@ -167,9 +203,10 @@ import ComToTop from "../components/totop";
    * @param {String} type 默认 "top"
    */
   const resetStateConfig = (type) => {
-    state.config.type = type || ENUM_NEWS_TYPE.TOP
-    state.config.count = 10
-    state.config.pageNum = 0
+    state.config.type = type || ENUM_NEWS_TYPE.TOP;
+    state.config.count = 10;
+    state.config.pageNum = 0;
+    state.loadingStatus = false;
   }
 
   /**
@@ -178,23 +215,37 @@ import ComToTop from "../components/totop";
    * @returns 
    */
   const changeTabCallback = async (tabName) => {
-    console.log("切换tab: ", tabName);
-
     // 切换新tab-1.重置旧的数据配置 2.listParent的内容清空
     resetStateConfig(tabName);
     state.listParentDom.innerHTML = "";
 
     // 滚动条回顶部
-    windowScrollTo(0, 0);
+    windowScrollTo();
 
     // 尝试重新设置列表数据
     setListData();
   }
 
-  /** 滚到顶部 */
-  const changeWindowToTop = () => {
-    console.log("滚到顶部");
-    windowScrollTo();
+  /**
+   * 点击到某项新闻
+   * @param {*} uniquekey 
+   */
+  const clickNewDetailCallback = (uniquekey) => {
+    // 新版 api 有新闻详情的接口,但是避免接口调用次数限制。
+    // 扔使用iframe套url新闻详情页的方法来处理。
+    // if (uniquekey) {
+    //   console.log("点击到： ", uniquekey)
+    //   location.href = "./detail.html?uniquekey=" + uniquekey;
+    // } 
+  }
+
+  /**
+   * 点击到某项新闻-old
+   * 缓存该项新闻数据,跳转详情页,通过iframe,渲染数据里的url
+   */
+  const clickNewDetailCallbackOldBeta = async (page, index) => {
+    const current = state.data[state.config.type][page][index];
+    await HomeModule.setHistoryCache(current.uniquekey, current);
   }
 
   init();

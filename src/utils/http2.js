@@ -84,12 +84,36 @@ class HttpHelper {
         if (this.xhr.readyState === 4) {
           const statusCode = this.xhr.status;
           if (statusCode.toString().startsWith('2')) {
-            // 2xx
-            const data = JSON.parse(this.xhr.responseText);
-            resolve(data);
+            const res = JSON.parse(this.xhr.responseText);
+            // 2xx + error_code = 0
+            if (res.error_code == 0) {
+              resolve(res);
+            }
+
+            // 特定错误处理-针对第三方-聚合数据返回错误码
+            const error_code = res.error_code;
+            switch (error_code) {
+              case 10011:
+                reject("抱歉,第三方接口请求超过限制...");
+                break;
+                case 10012:
+                reject("抱歉,第三方接口请求超过次数限制...");
+                break;
+              case 10014:
+                reject("抱歉,第三方接口系统内部异常...");
+                break;
+              case 10020:
+                reject("抱歉,第三方接口维护...");
+                break;
+              case 10021:
+                reject("抱歉,第三方接口停用了...");
+                break;
+              default:
+                break;
+            }
           } else {
             // 4xx,5xx
-            reject('请求失败');
+            reject('请求失败，请检查网络状态');
           }
         }
       }

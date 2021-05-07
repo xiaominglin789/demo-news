@@ -100,6 +100,7 @@ function debounce(func, delay = 300, immediately = false) {
  */
 function throttle(func, delay = 300) {
     let timer;
+    let result = null;
     // 检查函数
     if (typeof func !== 'function') {
         throw new TypeError('func not a function');
@@ -111,27 +112,40 @@ function throttle(func, delay = 300) {
         if (!timer) {
             timer = setTimeout(() => {
                 timer = null;
-                func.apply(that, args);
+                result = func.apply(that, args);
             }, delay);
         }
+        return result
     }
 }
 
-/** 获取滚动区的总高度 */
-const __getBodyScrollHeight = () => {
-    return document.body.scrollHeight || document.documentElement.scrollHeight;
-}
-
 /** 获取屏幕可视区的高度 */
-const __getClientViewHeight = () => {
+const getClientViewHeight = () => {
     return window.innerHeight || 
     document.body.clientWidth || 
     document.documentElement.clientHeight // 屏幕可视区高度
 }
 
 /** 获取滚动时到顶部的高度 */
-const __getVarScrollTop = () => {
+const getScrollTop = () => {
     return document.documentElement.scrollTop || document.body.scrollTop;
+}
+
+/**
+ * 检测滚动是否探底
+ * @param {*} callback 
+ * @param {*} offset 探底可控范围: 0-50px 以内都视为到底
+ */
+const checkScrollOverBottom = (callback, offset=50) => {
+    /** 获取滚动区的总高度 */
+    const __getBodyScrollHeight = () => {
+        return document.body.scrollHeight || document.documentElement.scrollHeight;
+    }
+
+    if (getScrollTop() + getClientViewHeight() + offset  - __getBodyScrollHeight() >= 0) {
+        // 探底了,执行回调
+        callback();
+    }
 }
 
 export {
@@ -140,7 +154,7 @@ export {
     setPageListFormat,
     debounce,
     throttle,
-    __getBodyScrollHeight,
-    __getClientViewHeight,
-    __getVarScrollTop
+    getScrollTop,
+    getClientViewHeight,
+    checkScrollOverBottom,
 }

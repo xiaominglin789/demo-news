@@ -142,7 +142,8 @@ const checkScrollOverBottom = (callback, offset=50) => {
         return document.body.scrollHeight || document.documentElement.scrollHeight;
     }
 
-    if (getScrollTop() + getClientViewHeight() + offset  - __getBodyScrollHeight() >= 0) {
+    /** 注意: 获取页面可滚动区域时须保证页面有内容够滚动 */
+    if (__getBodyScrollHeight() > getClientViewHeight() && getScrollTop() + getClientViewHeight() + offset  - __getBodyScrollHeight() >= 0) {
         // 探底了,执行回调
         callback();
     }

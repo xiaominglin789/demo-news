@@ -1,5 +1,5 @@
 /** 项目请求管理 */
-import HttpHelper from '../utils/http2';
+import HttpHelper from '../utils/http';
 import { NEWS_TYPE } from '../data';
 
 /**

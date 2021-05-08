@@ -112,8 +112,8 @@ class HttpHelper {
                 break;
             }
           } else {
-            // 4xx,5xx
-            reject('请求失败，请检查网络状态');
+            /** 氢气失败 */
+            reject("请求失败，请检查网络状态或接口地址");
           }
         }
       }

@@ -15,6 +15,7 @@ import ComList from "../components/list";
 import ComLoading from "../components/loading";
 import ComToTop from "../components/totop";
 import ComLoadMore from "../components/loadmore";
+import ComEmpty from "../components/empty";
 
 ((doc) => {
   const state = {
@@ -53,6 +54,7 @@ import ComLoadMore from "../components/loadmore";
     
     // 请求页面基础数据
     await setListData();
+    windowScrollTo(0, 2);
 
     // 绑定事件
     bindEvent();
@@ -123,6 +125,9 @@ import ComLoadMore from "../components/loadmore";
     /** 到顶部组件 */
     const comToTopStr = ComToTop.tpl();
 
+    /** empty组件 */
+    // const comEmptyStr = ComEmpty.tpl();
+
     // 子组件填充
     state.appDom.innerHTML += (headerTplStr + tabsTplStr + comListParent + comLoadingStr + comToTopStr);
 
@@ -145,7 +150,6 @@ import ComLoadMore from "../components/loadmore";
     const { type, count } = state.config;
 
     // 主动触发细微滚动事件,切换tab过程的初始化可见视口内的图片有限加载出来
-    windowScrollTo(0, 2);
 
     if (state.data[type]) {
       // 已有项
@@ -157,12 +161,36 @@ import ComLoadMore from "../components/loadmore";
     // 新tab项: 加载中图片-展示, 渲染
     resetStateConfig(type);
     ComLoading.show();
-    const result = await HomeModule.getNewsList(type, count);
-    if (result) {
+
+    try {
+      const result = await HomeModule.getNewsList(type, count);
+      if (result) {
+        removeTip();
+
+        // 加载中图片 隐藏
+        ComLoading.hidden();
+        state.data[type] = result;
+        renderNewsList(state.data[type][state.config.pageNum], state.config.pageNum);
+      }
+    } catch (error) {
       // 加载中图片 隐藏
       ComLoading.hidden();
-      state.data[type] = result;
-      renderNewsList(state.data[type][state.config.pageNum], state.config.pageNum);
+      addTip(error);
+    }
+  }
+
+  /** 添加 */
+  const addTip = (text) => {
+    if (!state.listParentDom.querySelector(".com-tip")) {
+      state.listParentDom.innerHTML += "<p class='com-tip' style='padding:12px;text-align:center;margin-top: 48px;'>"+ text +"</p>"
+    }
+  }
+
+  /** 移除提示 */
+  const removeTip = () => {
+    const has = state.listParentDom.querySelector(".com-tip");
+    if (has) {
+      state.listParentDom.reomveChildren(has);
     }
   }
 
@@ -170,6 +198,8 @@ import ComLoadMore from "../components/loadmore";
    * 获取更多
    */
   const getMoreList = async() => {
+    if (!state.data[state.config.type]) return;
+
     if (!state.loadingStatus) {
       clearTimeout(state.loadMoreTimer);
       // 开锁
@@ -224,20 +254,21 @@ import ComLoadMore from "../components/loadmore";
 
     // 尝试重新设置列表数据
     setListData();
+    windowScrollTo(0, 2);
   }
 
   /**
    * 点击到某项新闻
    * @param {*} uniquekey 
    */
-  const clickNewDetailCallback = (uniquekey) => {
-    // 新版 api 有新闻详情的接口,但是避免接口调用次数限制。
-    // 扔使用iframe套url新闻详情页的方法来处理。
-    // if (uniquekey) {
-    //   console.log("点击到： ", uniquekey)
-    //   location.href = "./detail.html?uniquekey=" + uniquekey;
-    // } 
-  }
+  // const clickNewDetailCallbackNewBeta = (uniquekey) => {
+  //   // 新版 api 有新闻详情的接口,但是避免接口调用次数限制。
+  //   // 扔使用iframe套url新闻详情页的方法来处理。
+  //   if (uniquekey) {
+  //     console.log("点击到： ", uniquekey)
+  //     location.href = "./detail.html?uniquekey=" + uniquekey;
+  //   } 
+  // }
 
   /**
    * 点击到某项新闻-old

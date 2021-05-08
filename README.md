@@ -189,6 +189,7 @@ listParent.addEventListener("click", () => {
 
 
 
+
 ## 使用数组模拟:队列 处理历史浏览,收藏列表(限制条数)
 - Array.unshift(data) 在队首插入元素
 - Array.pop() 移除队尾元素

@@ -3,7 +3,7 @@ import item0Tpl from "./tpl/item_0.tpl";
 import item1Tpl from "./tpl/item_1.tpl";
 import item2Tpl from "./tpl/item_2.tpl";
 import item3Tpl from "./tpl/item_3.tpl";
-import { lazyImageLoader, templateReplace, __getClientViewHeight } from "../../utils/utils";
+import { templateReplace, __getClientViewHeight } from "../../utils/utils";
 import "./index.scss";
 
 export default {
@@ -50,22 +50,31 @@ export default {
                 pageNum,
             })
         });
-
         return listChildsStr
     },
     tplParent(options) {
         const { top } = options
-        return templateReplace(tpl, { listDomStr: "", top })
+        return templateReplace(tpl, { listDomStr: "", top: top||0 })
     },
     /**
      * 滚动可见区域,才显示图片
      */
     showListImg(clientViewHeight) {
-        if (!clientViewHeight) { 
-            clientViewHeight = __getClientViewHeight();
-        }
-
         const imgsDom = document.querySelectorAll("."+this.listItemImgClassName);
+        if (!clientViewHeight) { 
+            [...imgsDom].forEach((child) => {
+                    // 满足可视区域内才加载对应的图片
+                    const temp = new Image();
+                    temp.src = child.dataset.img;
+                    temp.onload = () => {
+                        child.src = temp.src;
+                    }
+                    temp.onerror = (e) => {
+                        // 处理图片加载失败, 切换成加载失败的图片
+                    }
+            })
+            return;
+        }
 
         // 监听可见区域, 控制 imgsDom 的 opacity 即可
         [...imgsDom].forEach((child) => {
@@ -95,19 +104,23 @@ export default {
         while(target) {
             if (target.className.split(" ")[0] === this.childItemClassName) {
                 // 找到点击到新闻列表的项,
-                
                 // 新版api可以 直接通过 uniquekey 获取新闻详情
                 // callback(uniquekey);
-
-                // 旧
+                // 旧api
                 const uniquekey= target.dataset.uniquekey;
                 const page = target.dataset.page;
                 const index = target.dataset.index;
-                callback(page, index);
-                window.location.href = "./detail.html?from=" + window.location.pathname + "&uniquekey=" + uniquekey;
+                this.__oldBetaDoing(page, index, uniquekey, callback);
                 break;
             }
             target = target.parentNode; // 递归父节点
         }
+    },
+    __newBetaDoing() {
+        // TODO
+    },
+    __oldBetaDoing(page, index, uniquekey, callback) {
+        callback(page, index);
+        window.location.href = "./detail.html?from=" + window.location.pathname + "&uniquekey=" + uniquekey;
     }
 }

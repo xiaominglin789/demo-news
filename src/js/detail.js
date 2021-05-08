@@ -33,7 +33,7 @@ import ComFollow from "../components/follow";
     if (bool) {
       state.isFollow = !state.isFollow;
       // 设置dom样式
-      state.followDom.style.color = state.isFollow ? "red" : "#333333";
+      state.isFollow ? ComFollow.tplFollow() : ComFollow.tplUnFollow() ;
     }
   }
 
@@ -56,6 +56,7 @@ import ComFollow from "../components/follow";
   const initRenderFollow = async () => {
     if (state.data) {
       const { has } = await HomeModule.checkFollowRecord(state.data["uniquekey"]);
+      console.log("点赞状态: ", has ? true : false);
       return has ? ComFollow.tplFollow() : ComFollow.tplUnFollow() ;
     }
     return "";

@@ -1,7 +1,8 @@
-import HttpHelper from "../utils/http2";
+import HttpHelper from "../utils/http";
 import LocalStorageHelper from "../utils/localStorage";
 import { setPageListFormat } from "../utils/utils";
 
+/** 换种方式-使用-类模块关联请求和业务逻辑 */
 class HomeModule extends HttpHelper {
     constructor() {
         super();
@@ -30,9 +31,14 @@ class HomeModule extends HttpHelper {
                 LocalStorageHelper.setCacheItem(type, pageData);
                 resolve(pageData);
             } else {
-                reject(res);
+                reject("请求失败，没有数据");
             }
         });
+    }
+
+    /** 获取缓存中收藏记录 */
+    async getFollowList() {
+        return LocalStorageHelper.getCacheItemByKey(this.CACHE_FOLLOW_KEY) || [];
     }
 
     /** 设置浏览记录缓存 */

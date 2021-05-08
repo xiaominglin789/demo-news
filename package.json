@@ -7,7 +7,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "dev": "webpack-dev-server",
+    "dev": "webpack-dev-server --inline --hot",
     "serve": "cross-env NODE_ENV=development webpack-dev-server --host localhost --content-base dist/ --hot --watch-cli --config webpack.config.js --progress --display-modules --colors --display-reasons",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js"
   },

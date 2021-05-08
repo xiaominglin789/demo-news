@@ -156,6 +156,58 @@ showListImg(clientViewHeight) {
 
 
 
+
+## 合理利用冒泡机制优化性能 - 避免: 创建过多的事件监听，对页面性能有影响
+```bash
+// 100列表项,每个项监听点击事件
+<ul class="list">
+  <li class="list-item" data-index="0">
+  <li class="list-item active" data-index="1">
+  ...
+  <li class="list-item" data-index="99">
+</ul>
+const listChildren = document.querySelector(".list-item");
+[...listChildren].forEach(child => {
+    const index = child.dataset.index;
+    child.addEventListener("click", (index) => {
+        // do something
+    }, false);
+});
+
+
+// 父容器-事件委托
+const listParent = document.querySelector(".list");
+listParent.addEventListener("click", () => {
+    const target = arguments[0].target;
+    if (target.className.splite(" ")[0].trim() === "list-item") {
+        const index = target.dataset.index;
+        // do something
+    }
+}, false);
+```
+
+
+
+
+## 使用数组模拟:队列 处理历史浏览,收藏列表(限制条数)
+- Array.unshift(data) 在队首插入元素
+- Array.pop() 移除队尾元素
+```javascript
+if (!has) {
+    // 没有记录
+    list.unshift(data);
+    // 控制条数
+    if (list.length > this.CACHE_FOLLOW_LIMIT_MAX) {
+        list.pop();
+    }
+    LocalStorageHelper.setCacheItem(this.CACHE_FOLLOW_KEY, list);
+}
+```
+
+
+
+
+
 ## 函数限流防抖
 ```javascript
 /**

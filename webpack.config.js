@@ -160,7 +160,7 @@ module.exports = {
     },
     open: true,
     hot: true,
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 3000,
     proxy: {
       '/api': {

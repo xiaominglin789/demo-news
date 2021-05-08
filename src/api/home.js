@@ -7,7 +7,9 @@ class HomeModule extends HttpHelper {
         super();
         this.CACHE_HISTORY_LIMIT_MAX = 10
         this.CACHE_HISTORY_KEY = "HOSTORY"
+
         this.CACHE_FOLLOW_KEY = "FOLLOW"
+        this.CACHE_FOLLOW_LIMIT_MAX = 30
     }
 
     /**
@@ -63,7 +65,6 @@ class HomeModule extends HttpHelper {
     /** 取出当前准备查看的新闻 */
     async getCurrentNewDetail() {
         const result = LocalStorageHelper.getCacheItemByKey(this.CACHE_HISTORY_KEY);
-        console.log("历史缓存记录 ", result);
         const res = result[0];
         if (res) {
             return res
@@ -73,34 +74,53 @@ class HomeModule extends HttpHelper {
     /**
      * 设置点赞/取消点赞
      * @param {*} uniquekey 
+     * @returns {Boolean} true: 设置成功, false: 设置失败
      */
-    async setFollowRecord(uniquekey) {
-        const index = await this.checkFollowRecord(uniquekey);
-        console.log("-------------", index);
-        const result = await LocalStorageHelper.getCacheItemByKey(this.CACHE_FOLLOW_KEY)||[];
-        if (index === -1) {
+    async setFollowRecord(data) {
+        if (!data) return false;
+
+        const { uniquekey } = data;
+        console.log("uniquekey = ", uniquekey);
+        const { index, has, list } = await this.checkFollowRecord(uniquekey);
+        console.log("index = ", index, " has = ", has, " list = ", list);
+        if (!has) {
             // 没记录,添加记录,为点赞操作
-            LocalStorageHelper.setCacheItem(this.CACHE_FOLLOW_KEY, [uniquekey, ...result]);
+            list.unshift(data);
+            if (list.length > this.CACHE_FOLLOW_LIMIT_MAX) {
+                list.pop();
+            }
+            LocalStorageHelper.setCacheItem(this.CACHE_FOLLOW_KEY, list);
         } else {
             // 有记录则为取消点赞, 从缓存中移除掉该记录
-            console.log(result);
-            result.splice(index,1);
-            console.log(result);
-            LocalStorageHelper.setCacheItem(this.CACHE_FOLLOW_KEY, result);
+            list.splice(index,1);
+            console.log("修改后 list: ", list);
+            LocalStorageHelper.setCacheItem(this.CACHE_FOLLOW_KEY, list);
         }
+        return true;
     }
 
     /**
      * 获取uniquekey的点赞情况
-     * -1: 没有记录-可以点赞 
-     * !=-1: 有记录-可以取消点赞
-     * @param {*} uniquekey 
+     * @param {String} uniquekey 
+     * @returns {Map} { 下标位置(index),  是否存在(has), 结果记录(record), 收藏记录列表(list) } || null
      */
-     async checkFollowRecord(uniquekey) {
+    async checkFollowRecord(uniquekey) {
+        if (!uniquekey) return;
+
         const result = LocalStorageHelper.getCacheItemByKey(this.CACHE_FOLLOW_KEY) || [];
-        console.log(result, " >>>>>>>>>>>>>>>");
-        const index = result.indexOf(uniquekey);
-        return index
+        
+        // reuslt => [{}]
+        let index = -1;
+        for (let i=0; i<result.length; i++) {
+            if (uniquekey === result[i]['uniquekey']) {
+                index = i;
+                break;
+            }
+        }
+
+        const has = index === -1 ? false : true;
+        const record = !has ? null : result[index];
+        return {index,  has, record, list: result };
     }
 }
 

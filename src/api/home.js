@@ -5,11 +5,11 @@ import { setPageListFormat } from "../utils/utils";
 class HomeModule extends HttpHelper {
     constructor() {
         super();
-        this.CACHE_HISTORY_LIMIT_MAX = 10
-        this.CACHE_HISTORY_KEY = "HOSTORY"
+        this.CACHE_HISTORY_LIMIT_MAX = 2;
+        this.CACHE_HISTORY_KEY = "HOSTORY";
 
-        this.CACHE_FOLLOW_KEY = "FOLLOW"
-        this.CACHE_FOLLOW_LIMIT_MAX = 30
+        this.CACHE_FOLLOW_KEY = "FOLLOW";
+        this.CACHE_FOLLOW_LIMIT_MAX = 30;
     }
 
     /**

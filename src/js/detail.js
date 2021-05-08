@@ -2,6 +2,7 @@ import "./import";
 import HomeModule from "../api/home";
 import ComHeader from "../components/header";
 import ComDetail from "../components/detail";
+import ComFollow from "../components/follow";
 
 ((doc) => {
 
@@ -20,21 +21,10 @@ import ComDetail from "../components/detail";
     if (!state.data) {
       state.data = await HomeModule.getCurrentNewDetail();
       
-      renderOnceInit();
-
-      await initFollowStatus();
+      await renderOnceInit();
 
       bindEvent();
     }
-  }
-
-  /** 初始化当前新闻的点赞状态 */
-  const initFollowStatus = async () => {
-    const { has } = await HomeModule.checkFollowRecord(state.data["uniquekey"]);
-    console.log("新闻的初始状态: ", has);
-    state.isFollow = has;
-    // 设置dom样式
-    state.followDom.style.color = state.isFollow ? "red" : "#333333";
   }
 
   /** 修改当前新闻的点赞状态 */
@@ -47,27 +37,33 @@ import ComDetail from "../components/detail";
     }
   }
 
-  const renderOnceInit = () => {
+  const renderOnceInit = async () => {
     const comHeaderStr = ComHeader.tpl({
       leftUrl: window.location.search.match(/(?<=from=).*?((?=&)|$)/)[0],
       title: "",
       showLeftIcon: true,
-      showRightIcon: true,
-      rightIcon: "icon-shoucang",
       isFixed: true,
-      top: 0,
       background: "#fff"
     })
 
-    const comDetailStr = ComDetail.tpl({ url: state.data.url })
+    const comDetailStr = ComDetail.tpl({ url: state.data.url });
     
-    state.appDom.innerHTML += (comHeaderStr + comDetailStr);
-    // 取到右侧收藏图标节点
-    state.followDom = document.querySelector(".btn.right");
+    const comFollowStr = await initRenderFollow();
+    
+    state.appDom.innerHTML += (comHeaderStr + comDetailStr + comFollowStr);
+  }
+
+  const initRenderFollow = async () => {
+    if (state.data) {
+      const { has } = await HomeModule.checkFollowRecord(state.data["uniquekey"]);
+      return has ? ComFollow.tplFollow() : ComFollow.tplUnFollow() ;
+    }
+    return "";
   }
 
   const bindEvent = () => {
-    ComHeader.bindEvent(headerRightIconClick);
+    ComHeader.bindEvent();
+    ComFollow.bindEvent(headerRightIconClick);
   }
 
   /** top-bar 右侧按钮被点击 */

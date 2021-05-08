@@ -7,6 +7,11 @@
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
+  <script>
+    if (!localStorage.getItem("APP_CACHE_HOSTORY")) {
+      window.location.href = "index.html";
+    }
+  </script>
 </head>
 <body>
   <div id="app">详情页</div>

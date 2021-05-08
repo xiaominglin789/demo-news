@@ -1,0 +1,1 @@
+<span class="com-follow iconfont {{ icon }} {{ followClass }}"></span>

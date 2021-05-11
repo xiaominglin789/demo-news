@@ -124,7 +124,7 @@ plugins: {
 
 
 
-## 图片懒加载
+## 图片懒加载+图片预加载 - 不成熟的方案
 ```javascript
 /**
  * 滚动可见区域,才显示图片
@@ -150,6 +150,35 @@ showListImg(clientViewHeight) {
             }
         }
     })
+}
+```
+
+
+
+
+## 图片懒加载 - 常规做法
+```javascript
+imageLazyLoad(clientViewHeight) {
+    if (!clientViewHeight) { 
+        // 没传入,重新取可视高度
+        clientViewHeight = getClientViewHeight();
+    }
+
+    const imgsDom = document.querySelectorAll("."+this.listItemImgClassName);
+    let tempChild; // 临时变量
+    let flagCount = 0; // 计数器
+    for (let i=flagCount; i < imgsDom.length; i++) {
+        tempChild = imgsDom[i];
+        // 图片的距离顶部高度 小于 当前可视区的滚动距离 表示在可视区内
+        if (tempChild.offsetTop < (clientViewHeight + getScrollTop())) {
+            if (tempChild.getAttribute("data-img")) {
+                tempChild.src = tempChild.getAttribute("data-img");
+                // 移除 data-img 属性
+                tempChild.removeAttribute("data-img");
+                flagCount++;
+            }
+        }
+    }
 }
 ```
 

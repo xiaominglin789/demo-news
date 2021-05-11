@@ -54,7 +54,6 @@ import ComEmpty from "../components/empty";
     
     // 请求页面基础数据
     await setListData();
-    windowScrollTo(0, 2);
 
     // 绑定事件
     bindEvent();
@@ -67,13 +66,14 @@ import ComEmpty from "../components/empty";
     ComList.bindEvent(state.listParentDom, clickNewDetailCallbackOldBeta);
     ComHeader.bindEvent(headerRightIconClick);
 
-    // window滚动事件
-    window.onscroll = throttle(scrollEvent, 500);
+    // window滚动事件和刚加载完毕的事件
+    window.onload = window.onscroll = throttle(scrollEvent, 500);
   }
 
   /** 滚动事件 */
   const scrollEvent = async() => {
-    ComList.showListImg(getClientViewHeight());
+    // 控制图片懒加载
+    ComList.imageLazyLoad(getClientViewHeight());
 
     // 控制回到顶部的图标显示隐藏
     if (getScrollTop() > state.showToTopMinHeight) {
@@ -82,6 +82,7 @@ import ComEmpty from "../components/empty";
       ComToTop.hideToTopIcon();
     }
 
+    // 检测是否探底
     checkScrollOverBottom(getMoreList);
   }
 
@@ -254,7 +255,8 @@ import ComEmpty from "../components/empty";
 
     // 尝试重新设置列表数据
     setListData();
-    windowScrollTo(0, 2);
+    // 确保切换后list正常优先加载可视区的图片
+    windowScrollTo(0,2);
   }
 
   /**

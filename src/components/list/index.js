@@ -3,7 +3,7 @@ import item0Tpl from "./tpl/item_0.tpl";
 import item1Tpl from "./tpl/item_1.tpl";
 import item2Tpl from "./tpl/item_2.tpl";
 import item3Tpl from "./tpl/item_3.tpl";
-import { templateReplace, __getClientViewHeight } from "../../utils/utils";
+import { templateReplace, getClientViewHeight, getScrollTop } from "../../utils/utils";
 import "./index.scss";
 
 export default {
@@ -48,6 +48,7 @@ export default {
                 index,
                 uniquekey,
                 pageNum,
+                defualtImgSrc: '../../../assets/img/default.gif',
             })
         });
         return listChildsStr
@@ -59,39 +60,27 @@ export default {
     /**
      * 滚动可见区域,才显示图片
      */
-    showListImg(clientViewHeight) {
-        const imgsDom = document.querySelectorAll("."+this.listItemImgClassName);
+    imageLazyLoad(clientViewHeight) {
         if (!clientViewHeight) { 
-            [...imgsDom].forEach((child) => {
-                    // 满足可视区域内才加载对应的图片
-                    const temp = new Image();
-                    temp.src = child.dataset.img;
-                    temp.onload = () => {
-                        child.src = temp.src;
-                    }
-                    temp.onerror = (e) => {
-                        // 处理图片加载失败, 切换成加载失败的图片
-                    }
-            })
-            return;
+            // 没传入,重新取可视高度
+            clientViewHeight = getClientViewHeight();
         }
 
-        // 监听可见区域, 控制 imgsDom 的 opacity 即可
-        [...imgsDom].forEach((child) => {
-            // 图片可视边界
-            const curRect = child.getBoundingClientRect();
-            if (curRect.top < clientViewHeight && curRect.bottom > 0) {
-                // 满足可视区域内才加载对应的图片
-                const temp = new Image();
-                temp.src = child.dataset.img;
-                temp.onload = () => {
-                    child.src = temp.src;
-                }
-                temp.onerror = (e) => {
-                    // 处理图片加载失败, 切换成加载失败的图片
+        const imgsDom = document.querySelectorAll("."+this.listItemImgClassName);
+        let tempChild; // 临时变量
+        let flagCount = 0; // 计数器
+        for (let i=flagCount; i < imgsDom.length; i++) {
+            tempChild = imgsDom[i];
+            // 图片的距离顶部高度 小于 当前可视区的滚动距离 表示在可视区内
+            if (tempChild.offsetTop < (clientViewHeight + getScrollTop())) {
+                if (tempChild.getAttribute("data-img")) {
+                    tempChild.src = tempChild.getAttribute("data-img");
+                    // 移除 data-img 属性
+                    tempChild.removeAttribute("data-img");
+                    flagCount++;
                 }
             }
-        })
+        }
     },
     bindEvent(listParentDom, callback) {
         if (listParentDom) {

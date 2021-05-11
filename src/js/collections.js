@@ -49,7 +49,7 @@ import HomeModule from "../api/home";
       list: data,
       pageNum: 0
     })
-    ComCollectionList.showListImg()
+    ComCollectionList.imageLazyLoad();
   }
 
   const bindEvent = () => {
